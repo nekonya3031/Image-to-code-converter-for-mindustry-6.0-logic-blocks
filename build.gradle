@@ -11,7 +11,7 @@ dependencies {
 }
 
 task dist (type: Jar) {
-    manifest{ attributes 'Main-Class': "Bot" }
+    manifest{ attributes 'Main-Class': "Parser" }
     from{ configurations.compileClasspath.collect{ it.isDirectory() ? it : it.name.endsWith("pom") ? it : zipTree(it)}}
     from files(sourceSets.main.output)
 }
