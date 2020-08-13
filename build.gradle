@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+  //  implementation 'net.dv8tion:JDA:3.5.0_329'
+}
+
+task dist (type: Jar) {
+    manifest{ attributes 'Main-Class': "Bot" }
+    from{ configurations.compileClasspath.collect{ it.isDirectory() ? it : it.name.endsWith("pom") ? it : zipTree(it)}}
+    from files(sourceSets.main.output)
+}
