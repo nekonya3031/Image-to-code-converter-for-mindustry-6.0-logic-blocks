@@ -35,53 +35,53 @@ int rgb=bi.getRGB(x,y);
 pictureR[x][y] = (rgb >> 16) & 0xFF; 
 pictureG[x][y] = (rgb >> 8) & 0xFF; 
 pictureB[x][y] = (rgb ) & 0xFF;
-baka="draw rect "+x+" "+(h-y)+" 1 1 0\n";
+baka="draw rect "+x+" "+(h-y)+" 1 1 0 0\n";
 if(counter<1001){
 writer0.append(baka);
-baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 0 0\n";
+baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 255 0 0\n";
 writer0.append(baka);
-baka="drawflush @0\n";
+baka="drawflush display1\n";
 writer0.append(baka);}
 
 if(counter>1000&&counter<2001){
 writer1.append(baka);
-baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 0 0\n";
+baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 255 0 0\n";
 writer1.append(baka);
-baka="drawflush @0\n";
+baka="drawflush display1\n";
 writer1.append(baka);}
 
 if(counter>2000&&counter<3001){
 writer2.append(baka);
-baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 0 0\n";
+baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 255 0 0\n";
 writer2.append(baka);
-baka="drawflush @0\n";
+baka="drawflush display1\n";
 writer2.append(baka);}
 
 if(counter<4001&&counter>3000){
 writer3.append(baka);
-baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 0 0\n";
+baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 255 0 0\n";
 writer3.append(baka);
-baka="drawflush @0\n";
+baka="drawflush display1\n";
 writer3.append(baka);}
 
 if(counter>4000&&counter<5001){
 writer4.append(baka);
-baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 0 0\n";
+baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 255 0 0\n";
 writer4.append(baka);
-baka="drawflush @0\n";
+baka="drawflush display1\n";
 writer4.append(baka);}
 
 if(counter>5000&&counter<6001){
 writer5.append(baka);
-baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 0 0\n";
+baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 255 0 0\n";
 writer5.append(baka);
-baka="drawflush @0\n";
+baka="drawflush display1\n";
 writer5.append(baka);}
 if(counter>6000){
 writer6.append(baka);
-baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 0 0\n";
+baka="draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 255 0 0\n";
 writer6.append(baka);
-baka="drawflush @0\n";
+baka="drawflush display1\n";
 writer6.append(baka);}
 counter++;
 y++;
