@@ -25,12 +25,11 @@ public class Parser{
     int[][] pictureR=new int[w][h];
     int[][] pictureG=new int[w][h];
     int[][] pictureB=new int[w][h];
-    int[][] pictureFw1=new int[w][h];
-    int[][] pictureFh1=new int[w][h];
-    int[][] pictureFw=new int[w][h];
-    int[][] pictureFh=new int[w][h];
-    int[][] pictureOu=new int[w][h];
-    int counter=0;
+    int[][] yChecker=new int[w][h];
+
+
+
+
     
     int x=0;int y=0;
     System.out.println("pp");
@@ -41,50 +40,50 @@ int rgb=bi.getRGB(x,y);
 pictureR[x][y] = (rgb >> 16) & 0xFF; 
 pictureG[x][y] = (rgb >> 8) & 0xFF; 
 pictureB[x][y] = (rgb ) & 0xFF;
-pictureFh[x][y]=rgb;
-pictureFw[x][y]=rgb;
 y++;
 }
 x++;
 }
 System.out.println("ppa");
 x=0;
+int lastY=0;
+int counter=1;
 while(x<w){
     y=0;
+    lastY=0;
     while(y<h){
-    if(pictureFh1[x][y]!=-1){
-        int e=1;
-        while((x+e<w)&&pictureFh[x][y]==pictureFh[x+e][y]){pictureFh1[x+e][y]=-1;e++;}
-        if((x+1<w)&&pictureFh[x][y]!=pictureFh[x+1][y]){pictureFh[x][y]=0;}else{pictureFh1[x][y]=e-1;}}
+        if(lastY!=y){
+          if(bi.getRGB(x,y)==bi.getRGB(x,lastY)){
+              counter++;
+              yChecker[x][y]=-1;
+          }  else{
+              yChecker[x][lastY]=counter;
+              counter=1;
+              lastY=y;
+          }
+        }
+
         y++;
     }
+    yChecker[x][lastY]=counter;
+    counter=1;
     x++;
 }
 System.out.println("ppe");
 x=0;
+int printer=0;
 while(x<w){
     y=0;
     while(y<h){
-    if(pictureFw1[x][y]!=-1){
-        int e=1;
-        while((y+e<h)&&pictureFw[x][y]==pictureFw[x][y+e]){pictureFw1[x][y+e]=-1;e++;}
-        if((y+1<h)&&pictureFw[x][y]!=pictureFw[x][y+1]){pictureFw[x][y]=0;}else{pictureFw1[x][y]=e-1;}}
-        y++;
-    }
-    x++;
-}
-x=0;
-System.out.println("pps");
-while(x<w){
-    y=0;
-    while(y<h){
-        if(pictureFh1[x][y]!=-1){ writer3.append("draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 255 0 0\ndraw rect "+x+" "+(h-y)+" "+(pictureFh1[x][y]+1)+" 1 0 0\n");writer0.append(" "+pictureFh1[x][y]+" ");}else
-        writer0.append(pictureFh1[x][y]+" ");
-       
+        if(yChecker[x][y]!=-1){printer++; writer1.append("draw color "+pictureR[x][y]+" "+pictureG[x][y]+" "+pictureB[x][y]+" 255 0 0\ndraw rect "+x+" "+y+" 1 "+(yChecker[x][y]+1)+" 0 0\n");writer0.append(" "+yChecker[x][y]+" ");}else
+        writer0.append(yChecker[x][y]+" ");
+        if(printer>100){printer=0;writer1.append("drawflush display1\n");}
         y++;
     }
     x++;writer0.append("\n");
 }
+        writer1.append("drawflush display1");
+/*
 x=0;
 while(x<w){
     y=0;
@@ -95,7 +94,9 @@ while(x<w){
     }
     x++;writer1.append("\n");
 }
-writer0.flush();writer1.flush();
+
+ */
+writer0.flush();writer1.flush();writer3.flush();
 System.out.println("end");
 }catch(IOException e){System.out.println("err");};
 
