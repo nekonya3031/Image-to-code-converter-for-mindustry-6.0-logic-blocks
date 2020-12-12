@@ -15,7 +15,7 @@ public class Parser {
             FileWriter writer3 = new FileWriter("output3.txt", false);
             FileWriter writer4 = new FileWriter("output4.txt", false);
             FileWriter writer5 = new FileWriter("output5.txt", false);
-            FileWriter writer6 = new FileWriter("output6.txt", false);
+
             ArrayList<Rect> rects =new ArrayList<>();
             Set<Integer>colors=new HashSet<Integer>();
 
@@ -112,13 +112,33 @@ while(x<w){
             writer3.flush();
             System.out.println("end standart actions set");
 
+
+            int stringChecker=1;
+            int PFChecker=1;
+            String TColor=null;
+            FileWriter writerC = new FileWriter("COut"+PFChecker+".txt", false);
             for(int c:colors){
-                writer6.append("draw color " + ((c >> 16) & 0xFF) + " " + ((c >> 8) & 0xFF) + " " + ((c) & 0xFF) + " 255 0 0\n");
+                TColor=("draw color " + ((c >> 16) & 0xFF) + " " + ((c >> 8) & 0xFF) + " " + ((c) & 0xFF) + " 255 0 0\n");
+                stringChecker++;
+                writerC.append(TColor);
                 for(Rect r:getColor(c,rects)){
-                    writer6.append("draw rect " + r.x + " " + r.y + " 1 " + r.z + " 0 0\n");
+                    writerC.append("draw rect " + r.x + " " + r.y + " 1 " + r.z + " 0 0\n");
+                    stringChecker++;
+                    if(stringChecker==250||stringChecker==500||stringChecker==750){
+                        writerC.append("drawflush display1\n");stringChecker++;
+                    }
+                    if(stringChecker==1000||stringChecker>999){
+                        writerC.append("drawflush display1");stringChecker=2;
+                        PFChecker++;
+                        //TODO killer remove
+                        //if(PFChecker>10){return;}
+                        writerC.flush();
+                        writerC = new FileWriter("COut"+PFChecker+".txt", false);
+                        writerC.append(TColor);
+                    }
                 }
             }
-            writer6.flush();
+            writerC.flush();
             System.out.println("end custom actions set");
 
         } catch (IOException e) {
