@@ -23,7 +23,9 @@ public class Parser {
             BufferedImage bi = ImageIO.read(new File("image.png"));
 
             int w = bi.getWidth();
+            if(w>176){w=176;}
             int h = bi.getHeight();
+            if(h>176){h=176;}
             int[][] pictureR = new int[w][h];
             int[][] pictureG = new int[w][h];
             int[][] pictureB = new int[w][h];
@@ -112,32 +114,42 @@ while(x<w){
             writer3.flush();
             System.out.println("end standart actions set");
             
-
+            String[][] sch=new String[8][8];
             int maxColor=getBGcolor(rects,colors);
             rects=rmColor(maxColor,rects);
+            int schx=0;
+            int schy=0;
             int stringChecker=2;
             int PFChecker=1;
             String TColor=null;
             FileWriter writerC = new FileWriter("COut"+PFChecker+".txt", false);
             writerC.append("draw clear " + ((maxColor >> 16) & 0xFF) + " " + ((maxColor >> 8) & 0xFF) + " " + ((maxColor) & 0xFF) + " 255 0 0\n");
+            sch[schx][schy]+="draw clear " + ((maxColor >> 16) & 0xFF) + " " + ((maxColor >> 8) & 0xFF) + " " + ((maxColor) & 0xFF) + " 255 0 0\n";
             for(int c:colors){
                 TColor=("draw color " + ((c >> 16) & 0xFF) + " " + ((c >> 8) & 0xFF) + " " + ((c) & 0xFF) + " 255 0 0\n");
                 stringChecker++;
                 writerC.append(TColor);
+                sch[schx][schy]+=TColor;
                 for(Rect r:getColor(c,rects)){
                     writerC.append("draw rect " + r.x + " " + r.y + " 1 " + r.z + " 0 0\n");
+                    sch[schx][schy]+="draw rect " + r.x + " " + r.y + " 1 " + r.z + " 0 0\n";
                     stringChecker++;
                     if(stringChecker==250||stringChecker==500||stringChecker==750){
                         writerC.append("drawflush display1\n");stringChecker++;
+                        sch[schx][schy]+="drawflush display1\n";
                     }
                     if(stringChecker==1000||stringChecker>999){
                         writerC.append("drawflush display1");stringChecker=2;
+                        sch[schx][schy]+="drawflush display1";
                         PFChecker++;
+                        schx++;
+                        if(schx>7){schy++;schx=0;}
                         //TODO killer remove
                         //if(PFChecker>10){return;}
                         writerC.flush();
                         writerC = new FileWriter("COut"+PFChecker+".txt", false);
                         writerC.append(TColor);
+                        sch[schx][schy]+=TColor;
                     }
                 }
             }
