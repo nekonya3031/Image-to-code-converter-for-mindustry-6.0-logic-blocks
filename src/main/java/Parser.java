@@ -111,12 +111,15 @@ while(x<w){
             writer1.flush();
             writer3.flush();
             System.out.println("end standart actions set");
+            
 
-
-            int stringChecker=1;
+            int maxColor=getBGcolor(rects,colors);
+            rects=rmColor(maxColor,rects);
+            int stringChecker=2;
             int PFChecker=1;
             String TColor=null;
             FileWriter writerC = new FileWriter("COut"+PFChecker+".txt", false);
+            writerC.append("draw clear " + ((maxColor >> 16) & 0xFF) + " " + ((maxColor >> 8) & 0xFF) + " " + ((maxColor) & 0xFF) + " 255 0 0\n");
             for(int c:colors){
                 TColor=("draw color " + ((c >> 16) & 0xFF) + " " + ((c >> 8) & 0xFF) + " " + ((c) & 0xFF) + " 255 0 0\n");
                 stringChecker++;
@@ -153,6 +156,29 @@ while(x<w){
             if(r.rgb==c){
             rtn.add(r);
         }}
+        return rtn;
+    }
+    public static ArrayList<Rect> rmColor(int c, ArrayList<Rect> a){
+        ArrayList<Rect> rtn=new ArrayList<>();
+        for(Rect r:a){
+            if(r.rgb!=c){
+                rtn.add(r);
+            }}
+        return rtn;
+    }
+    public static Integer getBGcolor(ArrayList<Rect> a,Set<Integer> c){
+        int rtn=0;
+        int maxWal=0;
+        int tempWal=0;
+        for(int e:c){
+            tempWal=0;
+        for(Rect r:a){
+            if(r.rgb==e){
+                tempWal++;
+            }
+        }
+        if(tempWal>maxWal){maxWal=tempWal;rtn=e;}
+        }
         return rtn;
     }
 }
