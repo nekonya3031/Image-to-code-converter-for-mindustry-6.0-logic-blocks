@@ -73,17 +73,7 @@ public class Parser {
             System.out.println("ppe");
             x = 0;
             int printer = 0;
-            while (x < w) {
-                y = 0;
-                while (y < h) {
-                    if (yChecker[x][y] != -1) {
-                        rects.add(new Rect(x,y,bi.getRGB(x, y),yChecker[x][y] + 1));
-                    }
-                    y++;
-                }
-                x++;
-                writer0.append("\n");
-            }
+
             while (x < w) {
                 y = 0;
                 while (y < h) {
@@ -91,6 +81,7 @@ public class Parser {
                         printer++;
                         writer1.append("draw color " + pictureR[x][y] + " " + pictureG[x][y] + " " + pictureB[x][y] + " 255 0 0\ndraw rect " + x + " " + y + " 1 " + (yChecker[x][y] + 1) + " 0 0\n");
                         writer0.append(" " + yChecker[x][y] + " ");
+                        rects.add(new Rect(x,y,yChecker[x][y] + 1,bi.getRGB(x, y)));
                     } else
                         writer0.append(yChecker[x][y] + " ");
                     if (printer > 100) {
@@ -119,20 +110,29 @@ while(x<w){
             writer0.flush();
             writer1.flush();
             writer3.flush();
-            System.out.println("end");
+            System.out.println("end standart actions set");
+
+            for(int c:colors){
+                writer6.append("draw color " + ((c >> 16) & 0xFF) + " " + ((c >> 8) & 0xFF) + " " + ((c) & 0xFF) + " 255 0 0\n");
+                for(Rect r:getColor(c,rects)){
+                    writer6.append("draw rect " + r.x + " " + r.y + " 1 " + r.z + " 0 0\n");
+                }
+            }
+            writer6.flush();
+            System.out.println("end custom actions set");
+
         } catch (IOException e) {
             System.out.println("err");
         }
         ;
 
     }
-    public boolean hasColor(int c,ArrayList<Rect> a){
-        for(Rect r:a){if(r.rgb==c){return true;}}
-        return false;
-    }
-    public ArrayList<Rect> getColor(int c,ArrayList<Rect> a){
+    public static ArrayList<Rect> getColor(int c, ArrayList<Rect> a){
         ArrayList<Rect> rtn=new ArrayList<>();
-        for(Rect r:a){if(r.rgb==c){rtn.add(r);}}
+        for(Rect r:a){
+            if(r.rgb==c){
+            rtn.add(r);
+        }}
         return rtn;
     }
 }
