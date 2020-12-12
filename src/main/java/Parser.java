@@ -16,6 +16,8 @@ public class Parser {
             FileWriter writer4 = new FileWriter("output4.txt", false);
             FileWriter writer5 = new FileWriter("output5.txt", false);
             FileWriter writer6 = new FileWriter("output6.txt", false);
+            ArrayList<Rect> rects =new ArrayList<>();
+            Set<Integer>colors=new HashSet<Integer>();
 
             System.out.print("p");
             BufferedImage bi = ImageIO.read(new File("image.png"));
@@ -35,6 +37,7 @@ public class Parser {
                 y = 0;
                 while (y < h) {
                     int rgb = bi.getRGB(x, y);
+                    colors.add(rgb);
                     pictureR[x][y] = (rgb >> 16) & 0xFF;
                     pictureG[x][y] = (rgb >> 8) & 0xFF;
                     pictureB[x][y] = (rgb) & 0xFF;
@@ -70,6 +73,17 @@ public class Parser {
             System.out.println("ppe");
             x = 0;
             int printer = 0;
+            while (x < w) {
+                y = 0;
+                while (y < h) {
+                    if (yChecker[x][y] != -1) {
+                        rects.add(new Rect(x,y,bi.getRGB(x, y),yChecker[x][y] + 1));
+                    }
+                    y++;
+                }
+                x++;
+                writer0.append("\n");
+            }
             while (x < w) {
                 y = 0;
                 while (y < h) {
@@ -111,6 +125,27 @@ while(x<w){
         }
         ;
 
+    }
+    public boolean hasColor(int c,ArrayList<Rect> a){
+        for(Rect r:a){if(r.rgb==c){return true;}}
+        return false;
+    }
+    public ArrayList<Rect> getColor(int c,ArrayList<Rect> a){
+        ArrayList<Rect> rtn=new ArrayList<>();
+        for(Rect r:a){if(r.rgb==c){rtn.add(r);}}
+        return rtn;
+    }
+}
+class Rect{
+    int x;
+    int y;
+    int z;
+    int rgb;
+    Rect(int x,int y,int z,int rgb){
+        this.x=x;
+        this.y=y;
+        this.z=z;
+        this.rgb=rgb;
     }
 }
 
