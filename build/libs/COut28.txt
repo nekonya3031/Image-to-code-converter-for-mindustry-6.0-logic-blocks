@@ -1,3 +1,0 @@
-draw color 127 128 130 255 0 0
-draw color 128 128 126 255 0 0
-draw rect 120 46 1 2 0 0
