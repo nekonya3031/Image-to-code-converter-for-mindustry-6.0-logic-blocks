@@ -4,10 +4,16 @@ plugins {
 
 repositories {
     jcenter()
+    mavenLocal()
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
 }
-
+ext{
+    mindustryVersion = 'v120'
+}
 dependencies {
-  //  implementation 'net.dv8tion:JDA:3.5.0_329'
+    compile "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    compile "com.github.Anuken.Mindustry:core:$mindustryVersion"
 }
 
 task dist (type: Jar) {
