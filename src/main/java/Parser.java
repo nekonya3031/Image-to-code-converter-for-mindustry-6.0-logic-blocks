@@ -9,6 +9,7 @@ import mindustry.game.Schematic;
 import mindustry.game.Schematics;
 import mindustry.world.Block;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.*;
 import java.awt.image.BufferedImage;
@@ -31,7 +32,6 @@ public class Parser {
             }
         }
         try {
-            String baka;
 
             FileWriter writer = new FileWriter("schematic.txt", false);
 
@@ -49,10 +49,10 @@ public class Parser {
             if (h > 176) {
                 h = 176;
             }
-            int[][] pictureR = new int[w][h];
-            int[][] pictureG = new int[w][h];
-            int[][] pictureB = new int[w][h];
+
+
             int[][] yChecker = new int[w][h];
+            int[][] rgb = new int[w][h];
 
 
             int x = 0;
@@ -61,11 +61,9 @@ public class Parser {
             while (x < w) {
                 y = 0;
                 while (y < h) {
-                    int rgb = bi.getRGB(x, y);
-                    colors.add(rgb);
-                    pictureR[x][y] = (rgb >> 16) & 0xFF;
-                    pictureG[x][y] = (rgb >> 8) & 0xFF;
-                    pictureB[x][y] = (rgb) & 0xFF;
+                    int baka = bi.getRGB(x, y);
+                    rgb[x][h - 1 - y] = baka;
+                    colors.add(baka);
                     y++;
                 }
                 x++;
@@ -79,41 +77,54 @@ public class Parser {
                 lastY = 0;
                 while (y < h) {
                     if (lastY != y) {
-                        if (bi.getRGB(x, y) == bi.getRGB(x, lastY)) {
+                        if (rgb[x][y] == rgb[x][lastY]) {
                             counter++;
                             yChecker[x][y] = -1;
+
                         } else {
                             yChecker[x][lastY] = counter;
                             counter = 1;
                             lastY = y;
                         }
                     }
-
                     y++;
                 }
                 yChecker[x][lastY] = counter;
                 counter = 1;
                 x++;
             }
+            System.out.println();
+            x = 0;
+            while (x < w) {
+                y = 0;
+                while (y < h) {
+                    if (yChecker[x][y] != -1) {
+                        rects.add(new Rect(x, y, yChecker[x][y] + 1, rgb[x][y]));
+                    }
+                    y++;
+                }
+                x++;
+            }
             System.out.println("graphic primetives finding succsess");
+            System.out.println(rects.size());
 
-
+            int processorId = 0;
             String[][] sch = new String[8][8];
             sch[0][0] = "";
-            int maxColor = getBGcolor(rects, colors);
-            rects = rmColor(maxColor, rects);
+            //int maxColor = getBGcolor(rects, colors);
+            //rects = rmColor(maxColor, rects);
             int schx = 0;
             int schy = 0;
             int stringChecker = 2;
-            int PFChecker = 1;
-            String TColor = null;
-            //FileWriter writerC = new FileWriter("COut"+PFChecker+".txt", false);
-            //writerC.append("draw clear " + ((maxColor >> 16) & 0xFF) + " " + ((maxColor >> 8) & 0xFF) + " " + ((maxColor) & 0xFF) + " 255 0 0\n");
-            sch[schx][schy] += "draw clear " + ((maxColor >> 16) & 0xFF) + " " + ((maxColor >> 8) & 0xFF) + " " + ((maxColor) & 0xFF) + " 255 0 0\n";
+            String TColor;
+            int id = 1;
+            //sch[schx][schy] += "draw clear " + ((maxColor >> 16) & 0xFF) + " " + ((maxColor >> 8) & 0xFF) + " " + ((maxColor) & 0xFF) + " 255 0 0\n";
+            stringChecker++;
+            stringChecker++;
+            sch[0][0] += "read id cell1 1\njump 0 notEqual id " + id + "\n";
             for (int c : colors) {
                 TColor = ("draw color " + ((c >> 16) & 0xFF) + " " + ((c >> 8) & 0xFF) + " " + ((c) & 0xFF) + " 255 0 0\n");
                 stringChecker++;
-                //writerC.append(TColor);
                 sch[schx][schy] += TColor;
                 for (Rect r : getColor(c, rects)) {
                     sch[schx][schy] += "draw rect " + r.x + " " + r.y + " 1 " + r.z + " 0 0\n";
@@ -122,32 +133,21 @@ public class Parser {
                         stringChecker++;
                         sch[schx][schy] += "drawflush display1\n";
                     }
-                    if (stringChecker == 999 && schx == 0 && schy == 0) {
-                        stringChecker = 2;
-                        sch[schx][schy] += "drawflush display1\nend";
-                        PFChecker++;
+                    if (stringChecker > 996) {
+                        stringChecker = 3;
+                        id++;
+                        sch[schx][schy] += "drawflush display1\nwrite " + id + " cell1 1";
                         schx++;
                         if (schx > 7) {
                             schy++;
                             schx = 0;
                         }
-                        sch[schx][schy] = "";
-                        sch[schx][schy] += TColor;
-                    }
-                    if (stringChecker == 1000 || stringChecker > 999) {
-                        stringChecker = 2;
-                        sch[schx][schy] += "drawflush display1";
-                        PFChecker++;
-                        schx++;
-                        if (schx > 7) {
-                            schy++;
-                            schx = 0;
-                        }
-                        sch[schx][schy] = "";
+                        sch[schx][schy] = "read id cell1 1\njump 0 notEqual id " + id + "\n";
                         sch[schx][schy] += TColor;
                     }
                 }
             }
+            sch[schx][schy] += "drawflush display1";
 
             writer.append(generate(sch));
             writer.flush();
