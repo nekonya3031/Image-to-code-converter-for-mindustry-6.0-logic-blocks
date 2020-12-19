@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    jcenter()
+    mavenLocal()
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+}
+ext{
+    mindustryVersion = 'v121.4'
+}
+dependencies {
+    compile "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    compile "com.github.Anuken.Mindustry:core:$mindustryVersion"
+}
+
+task dist (type: Jar) {
+    manifest{ attributes 'Main-Class': "Parser" }
+    from{ configurations.compileClasspath.collect{ it.isDirectory() ? it : it.name.endsWith("pom") ? it : zipTree(it)}}
+    from files(sourceSets.main.output)
+}
