@@ -19,7 +19,13 @@ import java.util.zip.DeflaterOutputStream;
 
 //todo фикс у коорды. фикс зависимостей
 public class Parser {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        System.out.print("Starting load picture");
+        BufferedImage bi = ImageIO.read(new File("image.png"));
+        parse(bi);
+    }
+
+    public static void parse(BufferedImage bi) {
         Version.enabled = false;
         Vars.content = new ContentLoader();
         Vars.content.createBaseContent();
@@ -32,14 +38,11 @@ public class Parser {
             }
         }
         try {
-
             FileWriter writer = new FileWriter("schematic.txt", false);
 
             ArrayList<Rect> rects = new ArrayList<>();
             Set<Integer> colors = new HashSet<Integer>();
 
-            System.out.print("Starting load picture");
-            BufferedImage bi = ImageIO.read(new File("image.png"));
 
             int w = bi.getWidth();
             if (w > 176) {
@@ -68,7 +71,7 @@ public class Parser {
                 }
                 x++;
             }
-            System.out.println("picture decoding to base colors succsess");
+            System.out.println("picture decoding to base colors succsess\nfounded colors: " + colors.size());
             x = 0;
             int lastY = 0;
             int counter = 1;
@@ -107,10 +110,19 @@ public class Parser {
             }
             System.out.println("graphic primetives finding succsess");
             System.out.println(rects.size());
-
+            BufferedImage img = new BufferedImage(176, 176, BufferedImage.TYPE_INT_RGB);
+            Graphics g = img.getGraphics();
+            for (Rect r : rects) {
+                g.setColor(new Color(r.rgb));
+                g.fillRect(r.x, r.y, 1, r.z);
+            }
+            File f = new File("baka.png");
+            f.createNewFile();
+            ImageIO.write(img, "png", f);
             int processorId = 0;
             String[][] sch = new String[8][8];
             sch[0][0] = "";
+            int generatedStrings = 0;
             //int maxColor = getBGcolor(rects, colors);
             //rects = rmColor(maxColor, rects);
             int schx = 0;
@@ -123,12 +135,14 @@ public class Parser {
             stringChecker++;
             sch[0][0] += "read id cell1 1\njump 0 notEqual id " + id + "\n";
             for (int c : colors) {
-                TColor = ("draw color " + ((c >> 16) & 0xFF) + " " + ((c >> 8) & 0xFF) + " " + ((c) & 0xFF) + " 255 0 0\n");
+                TColor = ("draw color " + (int) ((c >> 16) & 0xFF) + " " + (int) ((c >> 8) & 0xFF) + " " + (int) ((c) & 0xFF) + " 255 0 0\n");
                 stringChecker++;
                 sch[schx][schy] += TColor;
+
                 for (Rect r : getColor(c, rects)) {
                     sch[schx][schy] += "draw rect " + r.x + " " + r.y + " 1 " + r.z + " 0 0\n";
                     stringChecker++;
+                    generatedStrings++;
                     if (stringChecker == 250 || stringChecker == 500 || stringChecker == 750) {
                         stringChecker++;
                         sch[schx][schy] += "drawflush display1\n";
@@ -151,13 +165,14 @@ public class Parser {
 
             writer.append(generate(sch));
             writer.flush();
-
+            System.out.println("writed primitives: " + generatedStrings);
             System.out.println("end custom actions set");
 
         } catch (IOException e) {
             System.out.println("err");
         }
         ;
+
 
     }
 
