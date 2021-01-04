@@ -134,7 +134,7 @@ public class Parser {
             int schy = 0;
             int stringChecker = 2;
             String TColor;
-            int id = 1;
+            int id = 0;
             //sch[schx][schy] += "draw clear " + ((maxColor >> 16) & 0xFF) + " " + ((maxColor >> 8) & 0xFF) + " " + ((maxColor) & 0xFF) + " 255 0 0\n";
             stringChecker++;
             stringChecker++;
@@ -167,17 +167,20 @@ public class Parser {
                 }
             }
             sch[schx][schy] += "drawflush display1";
-
-
-            writer.append(generate(sch, schx, schy + 1));
+            sch[schx][schy] += "drawflush display1\nwrite 0 cell1 1";
+            if (schx == 7) {
+                schy++;
+                schx = 0;
+            } else {
+                schx++;
+            }
+            writer.append(generate(sch, schx, schy));
             writer.flush();
             System.out.println("writed primitives: " + generatedStrings);
             System.out.println("end custom actions set");
-
         } catch (IOException e) {
             System.out.println("err");
         }
-        ;
 
 
     }
@@ -222,10 +225,13 @@ public class Parser {
     public static String generate(String[][] c, int x, int y) {
         String sorterSch = "bXNjaAF4nGNgZGBkYmDJS8xNZeC4sP9iw4V9F9sYuFNSi5OLMgtKMvPzGBgYGfhzM5OL8nULivKTU4uL84sYQIIgwAfE3BVzklMamBgYhBiYGADInhTo";
         String cellSch = "bXNjaAF4nGNgZGBkYmDJS8xNZeC42HFhx4XtFzYwcKekFicXZRaUZObnMTAwMnDnpubmF1XqJqfm5DCABCAAAEaXELw=";
+        String displaySch = "bXNjaAF4nGNgY2BjYmDJS8xNZWBPySwuyEmsZOBOSS1OLsosKMnMz2NgYGQQzkksSk/VzclPz0zWhSkCSTAwASEDAF42EOI=";
         Block lp = null;
         Block cl = null;
+        Block ld = null;
         Schematic sorterschema = Schematics.readBase64(sorterSch);
         Schematic cellSchema = Schematics.readBase64(cellSch);
+        Schematic displaySchema = Schematics.readBase64(displaySch);
         for (Schematic.Stile gg : sorterschema.tiles) {
             lp = gg.block;
         }
@@ -238,16 +244,28 @@ public class Parser {
         if (cl == null) {
             System.out.println("ERROR SYKA");
         }
+        for (Schematic.Stile gg : displaySchema.tiles) {
+            ld = gg.block;
+        }
+        if (ld == null) {
+            System.out.println("ERROR SYKA");
+        }
         int a = 0;
         int b;
         byte f = 0;
         Seq<Schematic.Stile> tiles = new Seq<>();
-        Seq<LogicBlock.LogicLink> links = new Seq<>();
-        links.add(new LogicBlock.LogicLink(x, y, "cell1", true));
+
         while (a < 8) {
             b = 0;
             while (b < 7) {
                 if (c[a][b] != null) {
+                    Seq<LogicBlock.LogicLink> links = new Seq<>();
+                    links.add(new LogicBlock.LogicLink(dx(x, a), dy(y, b), "cell1", true));
+                    if (x == 0) {
+                        links.add(new LogicBlock.LogicLink(dx(3, a), dy(y + 2, b), "display1", false));
+                    } else {
+                        links.add(new LogicBlock.LogicLink(dx(3, a), dy(y + 3, b), "display1", false));
+                    }
                     tiles.add(new Schematic.Stile(lp, a, b, compress(c[a][b], links), f));
                 }
                 b++;
@@ -255,6 +273,12 @@ public class Parser {
             a++;
         }
         tiles.add(new Schematic.Stile(cl, x, y, null, f));
+        if (x == 0) {
+            tiles.add(new Schematic.Stile(ld, 3, y + 2, null, f));
+        } else {
+            tiles.add(new Schematic.Stile(ld, 3, y + 3, null, f));
+        }
+
         StringMap tags = new StringMap();
         tags.put("name", "photo");
         Schematic schem = new Schematic(tiles, tags, 8, 8);
@@ -289,6 +313,14 @@ public class Parser {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static int dx(int x1, int x2) {
+        return (x1 - x2);
+    }
+
+    static int dy(int y1, int y2) {
+        return (y1 - y2);
     }
 }
 
