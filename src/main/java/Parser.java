@@ -8,6 +8,7 @@ import mindustry.ctype.ContentType;
 import mindustry.game.Schematic;
 import mindustry.game.Schematics;
 import mindustry.world.Block;
+import mindustry.world.blocks.logic.LogicBlock;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -65,6 +66,10 @@ public class Parser {
                 y = 0;
                 while (y < h) {
                     int baka = bi.getRGB(x, y);
+                    int r = (int) ((baka >> 16) & 0xFF) / 12;
+                    int g = (int) ((baka >> 8) & 0xFF) / 12;
+                    int b = (int) ((baka) & 0xFF) / 12;
+                    baka = new Color(r * 12, g * 12, b * 12).getRGB();
                     rgb[x][h - 1 - y] = baka;
                     colors.add(baka);
                     y++;
@@ -163,7 +168,8 @@ public class Parser {
             }
             sch[schx][schy] += "drawflush display1";
 
-            writer.append(generate(sch));
+
+            writer.append(generate(sch, schx, schy + 1));
             writer.flush();
             System.out.println("writed primitives: " + generatedStrings);
             System.out.println("end custom actions set");
@@ -213,30 +219,42 @@ public class Parser {
         return rtn;
     }
 
-    public static String generate(String[][] c) {
-        String sirterSch = "bXNjaAF4nGNgZGBkYmDJS8xNZeC4sP9iw4V9F9sYuFNSi5OLMgtKMvPzGBgYGfhzM5OL8nULivKTU4uL84sYQIIgwAfE3BVzklMamBgYhBiYGADInhTo";
+    public static String generate(String[][] c, int x, int y) {
+        String sorterSch = "bXNjaAF4nGNgZGBkYmDJS8xNZeC4sP9iw4V9F9sYuFNSi5OLMgtKMvPzGBgYGfhzM5OL8nULivKTU4uL84sYQIIgwAfE3BVzklMamBgYhBiYGADInhTo";
+        String cellSch = "bXNjaAF4nGNgZGBkYmDJS8xNZeC42HFhx4XtFzYwcKekFicXZRaUZObnMTAwMnDnpubmF1XqJqfm5DCABCAAAEaXELw=";
         Block lp = null;
-        Schematic sorterschema = Schematics.readBase64(sirterSch);
+        Block cl = null;
+        Schematic sorterschema = Schematics.readBase64(sorterSch);
+        Schematic cellSchema = Schematics.readBase64(cellSch);
         for (Schematic.Stile gg : sorterschema.tiles) {
             lp = gg.block;
         }
         if (lp == null) {
             System.out.println("ERROR SYKA");
         }
+        for (Schematic.Stile gg : cellSchema.tiles) {
+            cl = gg.block;
+        }
+        if (cl == null) {
+            System.out.println("ERROR SYKA");
+        }
         int a = 0;
         int b;
         byte f = 0;
         Seq<Schematic.Stile> tiles = new Seq<>();
+        Seq<LogicBlock.LogicLink> links = new Seq<>();
+        links.add(new LogicBlock.LogicLink(x, y, "cell1", true));
         while (a < 8) {
             b = 0;
             while (b < 7) {
                 if (c[a][b] != null) {
-                    tiles.add(new Schematic.Stile(lp, a, b, compress(c[a][b]), f));
+                    tiles.add(new Schematic.Stile(lp, a, b, compress(c[a][b], links), f));
                 }
                 b++;
             }
             a++;
         }
+        tiles.add(new Schematic.Stile(cl, x, y, null, f));
         StringMap tags = new StringMap();
         tags.put("name", "photo");
         Schematic schem = new Schematic(tiles, tags, 8, 8);
@@ -246,19 +264,26 @@ public class Parser {
         return aaa.writeBase64(schem);
     }
 
-    static byte[] compress(String code) {
-        return compress(code.getBytes(Vars.charset));
+    static byte[] compress(String code, Seq<LogicBlock.LogicLink> links) {
+        return compress(code.getBytes(Vars.charset), links);
     }
 
-    static byte[] compress(byte[] bytes) {
+    static byte[] compress(byte[] bytes, Seq<LogicBlock.LogicLink> links) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(new DeflaterOutputStream(baos));
             stream.write(1);
             stream.writeInt(bytes.length);
             stream.write(bytes);
-            int actives = 0;
+            int actives = links.count(l -> l.active);
             stream.writeInt(actives);
+            for (LogicBlock.LogicLink link : links) {
+                if (!link.active)
+                    continue;
+                stream.writeUTF(link.name);
+                stream.writeShort(link.x);
+                stream.writeShort(link.y);
+            }
             stream.close();
             return baos.toByteArray();
         } catch (IOException e) {
